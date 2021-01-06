@@ -125,7 +125,7 @@ class RobotArsenal:
         open_departments = self.__get_robot_authed_departments()
         if len(open_departments) == 0:
             print("[RobotArsenal.get_members_infor_pair_in_chat] 机器人不归属于任何一个部门")
-            return []
+            return
         
         members = []
 
@@ -167,20 +167,20 @@ class RobotArsenal:
                 ret = chat_info[0]
         return ret
 
-    def __get_user_id_with_name(self, username):
+    def __get_user_id_with_name(self, username) -> str:
         """
-        :param username: 用户名
-        根据用户名获取user_id
+        :param username: 用户名 
+        根据用户名获取user_id，找不到时返回None
         """
-        url = "https://open.feishu.cn/open-apis/search/v1/user?query={0}".format(username)
-        data = self.__request(url, None, None, 'GET')
-        
-        user_list = data.get("users", [])
-        ret = ""
-        for user_dict in user_list:
-            if user_dict["name"] == username:
-                ret = user_dict["user_id"]
-        return ret
+        if username in self.name_to_id_dict.keys():
+            return self.name_to_id_dict[username]['user_id']
+        else:
+            self.update_department_members()
+            if username in self.name_to_id_dict.keys():
+                return self.name_to_id_dict[username]['user_id']
+            else:
+                print('[RobotArsenal.__get_user_id_with_name] 机器人所在部门找不到用户名为\'{0}\'的成员'.format(username))
+                return None
 
     def __get_members_in_chat(self, chat_id: str) -> list:
         """
@@ -205,7 +205,7 @@ class RobotArsenal:
 
     def send_message_to_user(self, message: str, username: str):
         """
-        [不可用]将消息私聊发送给用户
+        将消息私聊发送给用户
         :param message: 需要发送的消息
         :param username: 用户名
         """
@@ -232,5 +232,10 @@ class RobotArsenal:
         members = self.__get_members_in_chat(chat_id)
         return members
 
-
-        
+    def get_user_id_with_name(self, username):
+        """
+        :param username: 用户名 
+        根据用户名获取user_id，找不到时返回None
+        """
+        return self.__get_user_id_with_name(username)
+    
