@@ -5,6 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import path
 import json
 from urllib import request, parse
+from robot_arsenal import RobotArsenal
 
 
 APP_ID = "cli_9f58afd2fa2b900c"
@@ -13,6 +14,8 @@ APP_VERIFICATION_TOKEN = "0r5T8WDJl5nxZFZ901xWJfCSgfhN0f7r"
 UNKNOWN_DEFAULT = 'UNKNOWN'
 
 request_interests = ['employee_id', 'open_id', 'type', 'text']
+
+bot = RobotArsenal(APP_ID, APP_SECRET)
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -120,6 +123,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "text": text
             }
         }
+        name = bot.get_name_with_open_id(open_id)
+        if name != None:
+            bot.send_message_to_user_with_id("{0} 向你发送了内容 {1}".format(name, str.encode(text, 'utf8'), "a86adbec"))
+        else:
+            bot.send_message_to_user_with_id("{0} 向你发送了内容 {1}".format('不知名用户', str.encode(text, 'utf8'), "a86adbec"))
 
         data = bytes(json.dumps(req_body), encoding='utf8')
         req = request.Request(url=url, data=data, headers=headers, method='POST')
