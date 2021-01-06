@@ -123,11 +123,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "text": text
             }
         }
+
+        # 临时做一下消息转发
+
         name = bot.get_name_with_open_id(open_id)
         if name != None:
-            bot.send_message_to_user_with_id("{0} 向你发送了内容 {1}".format(name, text), "a86adbec")
+            bot.send_message_to_user_with_id("[{0}] 向你发送了内容 '{1}'".format(name, text), "a86adbec")
         else:
-            bot.send_message_to_user_with_id("{0} 向你发送了内容 {1}".format('不知名用户', text), "a86adbec")
+            bot.send_message_to_user_with_id("[{0}] 向你发送了内容 '{1}'".format('不知名用户', text), "a86adbec")
 
         data = bytes(json.dumps(req_body), encoding='utf8')
         req = request.Request(url=url, data=data, headers=headers, method='POST')
