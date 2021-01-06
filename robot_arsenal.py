@@ -118,7 +118,7 @@ class RobotArsenal:
         
         return members
 
-    def update_department_members(self):
+    def __update_department_members(self):
         """
         获取机器人归属部门的用户信息存入到name_to_id_list
         """
@@ -176,7 +176,7 @@ class RobotArsenal:
         if username in self.name_to_id_dict.keys():
             return self.name_to_id_dict[username]['user_id']
         else:
-            self.update_department_members()
+            self.__update_department_members()
             if username in self.name_to_id_dict.keys():
                 return self.name_to_id_dict[username]['user_id']
             else:
@@ -249,6 +249,7 @@ class RobotArsenal:
         根据user_id获取用户名，找不到时返回None
         """
         ret = None
+        self.__update_department_members()
         for username, user_id_info in self.name_to_id_dict.items():
             if user_id_info['open_id'] == open_id:
                 ret = username
