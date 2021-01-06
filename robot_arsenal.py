@@ -242,4 +242,16 @@ class RobotArsenal:
         根据用户名获取user_id，找不到时返回None
         """
         return self.__get_user_id_with_name(username)
+
+    def get_name_with_open_id(self, open_id:str):
+        """
+        :param open_id: 用户open_id
+        根据user_id获取用户名，找不到时返回None
+        """
+        ret = None
+        for username, user_id_info in self.name_to_id_dict.items():
+            if user_id_info['open_id'] == open_id:
+                ret = username
+                break
+        return ret
     
