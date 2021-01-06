@@ -10,6 +10,8 @@ class RobotArsenal:
         self.app_id = app_id
         self.app_secret = app_secret
         self.tenant_access_token = self.__get_tenant_access_token()
+        # {用户名 -> {'user_id':, 'open_id':, 'union_id':}, }
+        self.name_to_id_dict = {}
 
     def __get_tenant_access_token(self, ):
         """
@@ -98,7 +100,7 @@ class RobotArsenal:
         data = self.__request(url, None, None, "GET")
         return data.get("authed_open_departments", [])
 
-    def __get_department_members(self, department_open_id: str) -> list:
+    def __get_department_members_with_id(self, department_open_id: str) -> list:
         """
         :param department_open_id: 部门open_id
         获取机器人所在部门的用户列表
@@ -116,11 +118,10 @@ class RobotArsenal:
         
         return members
 
-    def __get_department_members(self) -> list:
+    def update_department_members(self):
         """
-        获取机器人归属部门的用户信息列表[{'employee_id/user_id':, 'name':, 'open_id':, 'union_id':}, ...]
+        获取机器人归属部门的用户信息存入到name_to_id_list
         """
-        # METHOD 2
         open_departments = self.__get_robot_authed_departments()
         if len(open_departments) == 0:
             print("[RobotArsenal.get_members_infor_pair_in_chat] 机器人不归属于任何一个部门")
@@ -129,10 +130,16 @@ class RobotArsenal:
         members = []
 
         for deparment_open_id in open_departments:
-            result = self.__get_department_members(deparment_open_id)
+            result = self.__get_department_members_with_id(deparment_open_id)
             members = members + result
         
-        return members
+        self.name_to_id_dict.clear()
+        for member in members:
+            self.name_to_id_dict[member['name']] = {
+                'user_id': member['employee_id'],
+                'open_id': member['open_id'],
+                'union_id': member['union_id'],
+            }
 
     def __get_chat_list(self, ) -> list:
         """
