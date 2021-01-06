@@ -165,6 +165,7 @@ class RobotArsenal:
         for chat_info in chat_list:
             if chat_info[1] == chat_name:
                 ret = chat_info[0]
+                break
         return ret
 
     def __get_user_id_with_name(self, username) -> str:
@@ -229,6 +230,9 @@ class RobotArsenal:
         :param chat_name: 群聊名
         """
         chat_id = self.__get_chat_id_with_name(chat_name)
+        if chat_id == "":
+            print("[RobotArsenal.get_members_in_chat] 未找到群聊\"{0}\"".format(chat_name))
+            return None
         members = self.__get_members_in_chat(chat_id)
         return members
 
