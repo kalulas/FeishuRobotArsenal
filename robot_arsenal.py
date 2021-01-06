@@ -70,7 +70,7 @@ class RobotArsenal:
             return {}
         return rsp_dict.get("data", {})
 
-    def __send_message(self, message: str, id_type:str, id: str):
+    def __send_message(self, message: str, id_type: str, id: str):
         """
         发送消息
         :param message: 文本消息
@@ -89,6 +89,50 @@ class RobotArsenal:
         message_id = data.get("message_id", "")
         if message_id != "":
             print('[RobotArsenal.__send_message] 消息发送成功，message_id={0}'.format(message_id))
+
+    def __get_robot_authed_departments(self) -> list:
+        """
+        查询机器人所在的授权部门open_id列表
+        """
+        url = "https://open.feishu.cn/open-apis/contact/v1/scope/get"
+        data = self.__request(url, None, None, "GET")
+        return data.get("authed_open_departments", [])
+
+    def __get_department_members(self, department_open_id: str) -> list:
+        """
+        :param department_open_id: 部门open_id
+        获取机器人所在部门的用户列表
+        """
+        url = "https://open.feishu.cn/open-apis/contact/v1/department/user/list?open_department_id={0}&page_size=100&fetch_child=true".format(department_open_id)
+
+        members = []
+        data = self.__request(url, None, None, "GET")
+        members = data.get("user_list", [])
+
+        while data.get("has_more", False):
+            page_token = data.get("page_token")
+            data = self.__request(url + "&page_token=" + page_token, None, None, "GET")
+            members = members + data.get("user_list", [])
+        
+        return members
+
+    def __get_department_members(self) -> list:
+        """
+        获取机器人归属部门的用户信息列表[{'employee_id/user_id':, 'name':, 'open_id':, 'union_id':}, ...]
+        """
+        # METHOD 2
+        open_departments = self.__get_robot_authed_departments()
+        if len(open_departments) == 0:
+            print("[RobotArsenal.get_members_infor_pair_in_chat] 机器人不归属于任何一个部门")
+            return []
+        
+        members = []
+
+        for deparment_open_id in open_departments:
+            result = self.__get_department_members(deparment_open_id)
+            members = members + result
+        
+        return members
 
     def __get_chat_list(self, ) -> list:
         """
@@ -174,9 +218,12 @@ class RobotArsenal:
 
     def get_members_in_chat(self, chat_name):
         """
-        获取群聊中所有用户信息
+        获取群聊中用户信息列表 [{'open_id':,'user_id':}...]
         :param chat_name: 群聊名
         """
         chat_id = self.__get_chat_id_with_name(chat_name)
         members = self.__get_members_in_chat(chat_id)
         return members
+
+
+        
