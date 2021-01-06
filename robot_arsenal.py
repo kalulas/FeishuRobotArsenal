@@ -9,7 +9,6 @@ class RobotArsenal:
         '''
         self.app_id = app_id
         self.app_secret = app_secret
-        self.tenant_access_token = self.__get_tenant_access_token()
         # {用户名 -> {'user_id':, 'open_id':, 'union_id':}, }
         self.name_to_id_dict = {}
 
@@ -49,7 +48,7 @@ class RobotArsenal:
         if headers == None:
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.tenant_access_token
+                "Authorization": "Bearer " + self.__get_tenant_access_token()
             }
 
         if req_body == None:
