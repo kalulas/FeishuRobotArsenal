@@ -91,6 +91,25 @@ class RobotArsenal:
         if message_id != "":
             print('[RobotArsenal.__send_message] 消息发送成功，message_id={0}'.format(message_id))
 
+    def __send_rich_message(self, rich_message: dict, id_type: str, id: str):
+        """
+        发送富文本消息
+        TODO 注释补全
+        """
+        url = "https://open.feishu.cn/open-apis/message/v4/send/"
+        req_body = {
+            id_type: id,
+            "msg_type": "post",
+            "content": {
+                "post": rich_message
+            }
+        }
+        print(str(req_body))
+        data = self.__request(url, None, req_body)
+        message_id = data.get("message_id", "")
+        if message_id != "":
+            print('[RobotArsenal.__send_message] 消息发送成功，message_id={0}'.format(message_id))
+
     def __get_robot_authed_departments(self) -> list:
         """
         查询机器人所在的授权部门open_id列表
@@ -200,6 +219,38 @@ class RobotArsenal:
         chat_id = self.__get_chat_id_with_name(chat_name)
         if chat_id != "":
             self.__send_message(message, "chat_id", chat_id)
+        else:
+            print("[RobotArsenal.send_message_to_chat] 未找到群聊\"{0}\"".format(chat_name))
+
+    def send_rich_message_to_chat(self, chat_name: str, title: str='title', content: str='', international: str='zh_cn'):
+        """
+        将富文本消息发送到群聊
+        TODO 注释补充
+        """
+        post_message = {
+            international: {
+                "title": title,
+                "content": [
+                    [{
+                        "tag": "text",
+                        "un_escape": True,
+                        "text": "【01/22 14:00封包 - 韩国01/27迭代池】kr.dev.Ep3分支",
+                    }],
+                    [{
+                        "tag": "a",
+                        "text": "tapd传送门点我",
+                        "href": "https://www.tapd.cn/20332331/prong/iterations/view/1120332331001002156#tab=StoryandTask",
+                    }],
+                    [{
+                        "tag": "at",
+                        "user_id": "all",
+                    }],
+                ]
+            }
+        }
+        chat_id = self.__get_chat_id_with_name(chat_name)
+        if chat_id != "":
+            self.__send_rich_message(post_message, "chat_id", chat_id)
         else:
             print("[RobotArsenal.send_message_to_chat] 未找到群聊\"{0}\"".format(chat_name))
 
