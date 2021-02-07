@@ -11,6 +11,9 @@ class RobotArsenal:
         self.app_secret = app_secret
         # {用户名 -> {'user_id':, 'open_id':, 'union_id':}, }
         self.name_to_id_dict = {}
+        self.access_token = self.__get_tenant_access_token()
+        # 提前缓存用户信息
+        self.__update_department_members()
 
     def __get_tenant_access_token(self, ):
         """
@@ -41,6 +44,11 @@ class RobotArsenal:
             return ""
         return rsp_dict.get("tenant_access_token", "")
 
+    def __handle_error_code(self, code: int):
+        if code == 99991663:
+            print('[RobotArsenal.__handle_error_code] 处理错误码{0}，重新获取access_token'.format(code))
+            self.__get_tenant_access_token()
+
     def __request(self, url: str, headers: dict, req_body: dict, method='POST') -> dict:
         """
         封装发送请求逻辑，返回response.data
@@ -48,7 +56,7 @@ class RobotArsenal:
         if headers == None:
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.__get_tenant_access_token()
+                "Authorization": "Bearer " + self.access_token
             }
 
         if req_body == None:
@@ -68,6 +76,7 @@ class RobotArsenal:
         code = rsp_dict.get("code", -1)
         if code != 0:
             print("[RobotArsenal.__request] error, code =", code)
+            self.__handle_error_code(code)
             return {}
         return rsp_dict.get("data", {})
 
@@ -296,13 +305,16 @@ class RobotArsenal:
     def get_name_with_open_id(self, open_id:str):
         """
         :param open_id: 用户open_id
-        根据user_id获取用户名，找不到时返回None
+        根据open_id获取用户名，找不到时返回None
         """
         ret = None
-        self.__update_department_members()
         for username, user_id_info in self.name_to_id_dict.items():
             if user_id_info['open_id'] == open_id:
                 ret = username
                 break
+
+        if ret == None:
+            self.__update_department_members()
+
         return ret
     
