@@ -317,4 +317,7 @@ class RobotArsenal:
             self.__update_department_members()
 
         return ret
+
+    def update_department_memtbers(self, ):
+        self.__update_department_members()
     
