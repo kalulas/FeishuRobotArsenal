@@ -2,6 +2,15 @@ import re
 import json
 from urllib import request, parse
 
+# @表达式后必须跟空格
+at_pattern = r"@(\w+)\s"
+at_all_pattern = "所有人"
+at_format_output = "<at open_id=\"{0}\"></at> "
+at_all_replace = "all"
+
+# url表达式后必须跟空格
+url_pattern = r'(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]\s'
+common_text_pattern = r'.+\s'
 
 class RobotArsenal:
     def __init__(self, app_id, app_secret):
@@ -240,25 +249,85 @@ class RobotArsenal:
         不存在的艾特信息将被替换为空字符串
         """
         at_content = at_content[1] # 用户名所在位置
-        at_format_string = "<at open_id=\"{0}\"></at> "
-        if at_content == "所有人":
-            return at_format_string.format("all")
+        if at_content == at_all_pattern:
+            return at_format_output.format(at_all_replace)
 
         open_id =  self.__get_open_id_with_name(at_content)
         if open_id == None:
             return ""
         else:
-            return at_format_string.format(open_id)
+            return at_format_output.format(open_id)
         
-
     def __preprocess_message(self, message:str) -> str:
         """
         对文本信息进行预处理，返回处理后的信息
         1. 将@信息转换为富文本
         """
         message = message + ' '
-        result = re.sub(r'@(\w+)\s', self.__process_at_message, message)
+        result = re.sub(at_pattern, self.__process_at_message, message)
         return result
+
+    def preprocess_rich_message(self, message:str) -> list:
+        """
+        将文本信息转化为富文本列表
+        """
+        # 预处理的预处理
+        # message = message + ' '
+        # message = re.sub(r'\n', ' \n', message)
+        message_save = message
+
+        line_idx = 0
+        line_size = 0
+        content = []
+        while len(message) != 0 and line_idx <= len(message_save):
+            print(message.replace('\n', '\\n'))
+            print("idx: " + str(line_idx))
+            if line_size == len(content):
+                content.append([])
+            
+            if message.startswith('\n'):
+                line_idx = line_idx + 1
+                line_size = line_size + 1
+                message = message_save[line_idx:]
+                continue
+
+            # 普通字符串
+            matchObj = re.match(at_pattern, message)
+            if matchObj:
+                content[line_size].append({
+                    "tag": "at",
+                    "user_id": self.get_user_id_with_name(matchObj.group(1)),
+                })
+                match_locate = matchObj.span()[1]
+                line_idx = line_idx + match_locate
+                message = message_save[line_idx:]
+                continue
+
+            # 超链接
+            matchObj = re.match(url_pattern, message)
+            if matchObj:
+                content[line_size].append({
+                    "tag": "a",
+                    "text": matchObj.group().strip(),
+                    "href": matchObj.group().strip(),
+                })
+                match_locate = matchObj.span()[1]
+                line_idx = line_idx + match_locate
+                message = message_save[line_idx:]
+                continue
+
+            matchObj = re.match(common_text_pattern, message)
+            if matchObj:
+                content[line_size].append({
+                    "tag": "text",
+                    "text": re.sub(r'\s', '&nbsp;', matchObj.group(0)),
+                })
+                match_locate = matchObj.span()[1]
+                line_idx = line_idx + match_locate
+                message = message_save[line_idx:]
+                continue
+
+        return content
 
     def send_message_to_chat(self, message: str, chat_name: str):
         """
@@ -341,6 +410,9 @@ class RobotArsenal:
         :param username: 用户名 
         根据用户名获取user_id，找不到时返回None
         """
+        if username == at_all_pattern:
+            return at_all_replace
+        
         return self.__get_user_id_with_name(username)
 
     def get_name_with_open_id(self, open_id:str):
@@ -359,6 +431,6 @@ class RobotArsenal:
 
         return ret
 
-    def update_department_memtbers(self, ):
+    def update_department_members(self, ):
         self.__update_department_members()
     
