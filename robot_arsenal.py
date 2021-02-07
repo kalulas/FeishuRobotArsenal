@@ -2,15 +2,18 @@ import re
 import json
 from urllib import request, parse
 
-# @表达式后必须跟空格
+# 匹配富文本@成员
 at_pattern = r"@(\w+)\s"
 at_all_pattern = "所有人"
 at_format_output = "<at open_id=\"{0}\"></at> "
 at_all_replace = "all"
 
-# url表达式后必须跟空格
+# 匹配富文本超链接成员
 url_pattern = r'(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]\s'
-common_text_pattern = r'.+\s'
+# 匹配富文本普通文本成员
+common_text_pattern = r'[\s]*[\w\.\，\：\:\/\-【】]+[\s]*'
+# 需要从普通文本中删减的部分
+strip_pattern = r''
 
 class RobotArsenal:
     def __init__(self, app_id, app_secret):
@@ -124,7 +127,7 @@ class RobotArsenal:
                 "post": rich_message
             }
         }
-        print(str(req_body))
+        # print(str(req_body))
         data = self.__request(url, None, req_body)
         message_id = data.get("message_id", "")
         if message_id != "":
@@ -267,28 +270,37 @@ class RobotArsenal:
         result = re.sub(at_pattern, self.__process_at_message, message)
         return result
 
-    def preprocess_rich_message(self, message:str) -> list:
+    def __preprocess_rich_message(self, raw_message:str) -> list:
         """
+        实验性功能
         将文本信息转化为富文本列表
         """
         # 预处理的预处理
-        # message = message + ' '
-        # message = re.sub(r'\n', ' \n', message)
+        message = re.sub(strip_pattern, '', raw_message)
+        if len(message) != len(raw_message):
+            print("[RobotArsenal.__preprocess_rich_message] 处理富文本时删减了部分文本，发送内容为:\n\033[1;33m{0}\033[0m".format(message))
         message_save = message
 
-        line_idx = 0
+        cur_idx = 0
+        pre_idx = -1
         line_size = 0
         content = []
-        while len(message) != 0 and line_idx <= len(message_save):
-            print(message.replace('\n', '\\n'))
-            print("idx: " + str(line_idx))
+        while len(message) != 0 and cur_idx < len(message_save):
+            if pre_idx == cur_idx:
+                print("[RobotArsenal.__preprocess_rich_message] 处理富文本时出错！请检查{0}是否符合要求".format(message))
+                content.clear()
+                break
+            pre_idx = cur_idx
+
+            # print(message.replace('\n', '\\n'))
+            # print("idx: " + str(cur_idx))
             if line_size == len(content):
                 content.append([])
             
             if message.startswith('\n'):
-                line_idx = line_idx + 1
+                cur_idx = cur_idx + 1
                 line_size = line_size + 1
-                message = message_save[line_idx:]
+                message = message_save[cur_idx:]
                 continue
 
             # 普通字符串
@@ -299,8 +311,8 @@ class RobotArsenal:
                     "user_id": self.get_user_id_with_name(matchObj.group(1)),
                 })
                 match_locate = matchObj.span()[1]
-                line_idx = line_idx + match_locate
-                message = message_save[line_idx:]
+                cur_idx = cur_idx + match_locate
+                message = message_save[cur_idx:]
                 continue
 
             # 超链接
@@ -312,19 +324,26 @@ class RobotArsenal:
                     "href": matchObj.group().strip(),
                 })
                 match_locate = matchObj.span()[1]
-                line_idx = line_idx + match_locate
-                message = message_save[line_idx:]
+                cur_idx = cur_idx + match_locate
+                message = message_save[cur_idx:]
                 continue
 
             matchObj = re.match(common_text_pattern, message)
             if matchObj:
                 content[line_size].append({
                     "tag": "text",
+                    "un_escape": True,
                     "text": re.sub(r'\s', '&nbsp;', matchObj.group(0)),
+                    # "text": matchObj.group(0),
                 })
                 match_locate = matchObj.span()[1]
-                line_idx = line_idx + match_locate
-                message = message_save[line_idx:]
+                cur_idx = cur_idx + match_locate
+                message = message_save[cur_idx:]
+                continue
+
+            if message_save[cur_idx] == ' ':
+                cur_idx = cur_idx + 1
+                message = message_save[cur_idx:]
                 continue
 
         return content
@@ -343,28 +362,16 @@ class RobotArsenal:
 
     def send_rich_message_to_chat(self, chat_name: str, title: str='title', content: str='', international: str='zh_cn'):
         """
-        将富文本消息发送到群聊
-        TODO 注释补充
+        将富文本消息发送到群聊，注意每种功能（@，超链接，普通字符串）后要加上空格
+        :param chat_name: 群聊名
+        :param title: 富文本标题
+        :param content: 富文本
+        :param international: 地区
         """
         post_message = {
             international: {
                 "title": title,
-                "content": [
-                    [{
-                        "tag": "text",
-                        "un_escape": True,
-                        "text": "【01/22 14:00封包 - 韩国01/27迭代池】kr.dev.Ep3分支",
-                    }],
-                    [{
-                        "tag": "a",
-                        "text": "tapd传送门点我",
-                        "href": "https://www.tapd.cn/20332331/prong/iterations/view/1120332331001002156#tab=StoryandTask",
-                    }],
-                    [{
-                        "tag": "at",
-                        "user_id": "all",
-                    }],
-                ]
+                "content": self.__preprocess_rich_message(content),
             }
         }
         chat_id = self.__get_chat_id_with_name(chat_name)
@@ -383,7 +390,27 @@ class RobotArsenal:
         if user_id != "":
             self.__send_message(message, "user_id", user_id)
         else:
-            print("[RobotArsenal.send_message_to_chat] 未找到用户\"{0}\"".format(username))
+            print("[RobotArsenal.send_message_to_user] 未找到用户\"{0}\"".format(username))
+
+    def send_rich_message_to_user(self, username: str, title: str='title', content: str='', international: str='zh_cn'):
+        """
+        将富文本消息发送给用户，注意每种功能（@，超链接，普通字符串）后要加上空格
+        :param username: 用户名
+        :param title: 富文本标题
+        :param content: 富文本
+        :param international: 地区
+        """
+        post_message = {
+            international: {
+                "title": title,
+                "content": self.__preprocess_rich_message(content),
+            }
+        }
+        user_id = self.__get_user_id_with_name(username)
+        if user_id != "":
+            self.__send_rich_message(post_message, "user_id", user_id)
+        else:
+            print("[RobotArsenal.send_rich_message_to_user] 未找到用户\"{0}\"".format(username))
 
     def send_message_to_user_with_id(self, message, user_id):
         """
