@@ -1,3 +1,4 @@
+import re
 import json
 from urllib import request, parse
 
@@ -87,6 +88,7 @@ class RobotArsenal:
         :param id_type: id类型 user_id / open_id / chat_id
         :param id: 对应id
         """
+        message = self.__preprocess_message(message)
         url = "https://open.feishu.cn/open-apis/message/v4/send/"
         req_body = {
             id_type: id,
@@ -132,7 +134,8 @@ class RobotArsenal:
         :param department_open_id: 部门open_id
         获取机器人所在部门的用户列表
         """
-        url = "https://open.feishu.cn/open-apis/contact/v1/department/user/list?open_department_id={0}&page_size=100&fetch_child=true".format(department_open_id)
+        url = "https://open.feishu.cn/open-apis/contact/v1/department/user/list?open_department_id={0}&page_size=100&fetch_child=true".format(
+            department_open_id)
 
         members = []
         data = self.__request(url, None, None, "GET")
@@ -210,6 +213,18 @@ class RobotArsenal:
                 print('[RobotArsenal.__get_user_id_with_name] 机器人所在部门找不到用户名为\'{0}\'的成员'.format(username))
                 return None
 
+    def __get_open_id_with_name(self, username) -> str:
+        """
+        :param username: 用户名 
+        根据用户名获取open_id，找不到时返回None
+        """
+        if username in self.name_to_id_dict.keys():
+            return self.name_to_id_dict[username]['open_id']
+        else:
+            self.__update_department_members()
+            print('[RobotArsenal.__get_open_id_with_name] 机器人所在部门找不到用户名为\'{0}\'的成员'.format(username))
+            return None
+
     def __get_members_in_chat(self, chat_id: str) -> list:
         """
         获取群组中的关键用户信息列表 [{'open_id':,'user_id':}...]
@@ -218,6 +233,32 @@ class RobotArsenal:
         data = self.__request(url, None, None, 'GET')
         members = data.get("members")
         return members
+
+    def __process_at_message(self, at_content) -> str:
+        """
+        处理艾特信息，将艾特内容转化为open_id或者所有人
+        不存在的艾特信息将被替换为空字符串
+        """
+        at_content = at_content[1] # 用户名所在位置
+        at_format_string = "<at open_id=\"{0}\"></at> "
+        if at_content == "所有人":
+            return at_format_string.format("all")
+
+        open_id =  self.__get_open_id_with_name(at_content)
+        if open_id == None:
+            return ""
+        else:
+            return at_format_string.format(open_id)
+        
+
+    def __preprocess_message(self, message:str) -> str:
+        """
+        对文本信息进行预处理，返回处理后的信息
+        1. 将@信息转换为富文本
+        """
+        message = message + ' '
+        result = re.sub(r'@(\w+)\s', self.__process_at_message, message)
+        return result
 
     def send_message_to_chat(self, message: str, chat_name: str):
         """
