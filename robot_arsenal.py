@@ -11,7 +11,7 @@ at_all_replace = "all"
 # 匹配富文本超链接成员
 url_pattern = r'(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]\s'
 # 匹配富文本普通文本成员
-common_text_pattern = r'[\s]*[\w\.\，\：\:\/\-【】]+[\s]*'
+common_text_pattern = r'[\s]*[^\s\@]+[\s]*'
 # 需要从普通文本中删减的部分
 strip_pattern = r''
 
