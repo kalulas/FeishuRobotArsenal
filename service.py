@@ -14,8 +14,9 @@ def message_center(bot: RobotArsenal, chat_type: str, open_id: str, open_chat_id
         # do nothing now
         pass
     elif chat_type == group_chat_type:
-        if text.startswith(roll_label):
-            result_size = (int)(re.findall('\d+', text)[0])
+        if text.find(roll_label):
+            substr = text[text.find(roll_label):]
+            result_size = (int)(re.findall('\d+', substr)[0])
             roll_and_notify(bot, result_size, open_chat_id)
         else:
             print("[message_center] unknown service!")
@@ -41,7 +42,7 @@ def roll_and_notify(bot: RobotArsenal, result_size: int, open_chat_id: str):
         if str(user_name) == "None":
             continue
         member_names.append(user_name)
-        print(user_name)
+        # print(user_name)
     
     send_message = "result: "
     for member_name in member_names:
