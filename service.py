@@ -8,7 +8,6 @@ group_chat_type = "group"
 roll_service_title = "\"roll {0}\"结果如下"
 roll_label = "roll"
 roll_error_param = "错误：命令格式为\"roll [人数]\""
-roll_result_size = 3
 
 def message_center(bot: RobotArsenal, chat_type: str, open_id: str, open_chat_id: str, text: str):
     if chat_type == private_chat_type:
