@@ -37,6 +37,10 @@ def roll_and_notify(bot: RobotArsenal, result_size: int, open_chat_id: str):
         return
 
     members = bot.get_members_in_chat(open_chat_id)
+    if members is None:
+        print("[service.roll_and_notify] 未找到 open_chat_id:{0} 对应群聊".format(open_chat_id))
+        return
+    
     random.shuffle(members) # 洗牌
     member_names = []
     idx = 0
