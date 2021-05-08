@@ -7,6 +7,7 @@ group_chat_type = "group"
 
 roll_service_title = "\"roll {0}\"结果如下"
 roll_label = "roll"
+roll_error_param = "错误：命令格式为\"roll [人数]\""
 roll_result_size = 3
 
 def message_center(bot: RobotArsenal, chat_type: str, open_id: str, open_chat_id: str, text: str):
@@ -16,7 +17,11 @@ def message_center(bot: RobotArsenal, chat_type: str, open_id: str, open_chat_id
     elif chat_type == group_chat_type:
         if text.find(roll_label):
             substr = text[text.find(roll_label):]
-            result_size = (int)(re.findall('\d+', substr)[0])
+            all_numbers = re.findall('\d+', substr)
+            if len(all_numbers) == 0:
+                result_size = -1
+            else:
+                result_size = (int)(all_numbers[0])
             roll_and_notify(bot, result_size, open_chat_id)
         else:
             print("[message_center] unknown service!")
@@ -28,6 +33,10 @@ def roll_and_notify(bot: RobotArsenal, result_size: int, open_chat_id: str):
     :param open_chat_id: 群聊ID
     :param result_size: 选取用户
     """
+    if result_size == -1:
+        bot.send_rich_message_to_chat(open_chat_id, title=roll_service_title.format(result_size), content=roll_error_param)
+        return
+
     members = bot.get_members_in_chat(open_chat_id)
     random.shuffle(members) # 洗牌
     member_names = []
