@@ -360,9 +360,10 @@ class RobotArsenal:
         else:
             print("[RobotArsenal.send_message_to_chat] 未找到群聊\"{0}\"".format(chat_name))
 
-    def send_rich_message_to_chat(self, chat_name: str, title: str='title', content: str='', international: str='zh_cn'):
+    def send_rich_message_to_chat(self, open_chat_id: str=None, chat_name: str='', title: str='title', content: str='', international: str='zh_cn'):
         """
         将富文本消息发送到群聊，注意每种功能（@，超链接，普通字符串）后要加上空格
+        :param open_chat_id: 群聊ID
         :param chat_name: 群聊名
         :param title: 富文本标题
         :param content: 富文本
@@ -374,7 +375,7 @@ class RobotArsenal:
                 "content": self.__preprocess_rich_message(content),
             }
         }
-        chat_id = self.__get_chat_id_with_name(chat_name)
+        chat_id = open_chat_id or self.__get_chat_id_with_name(chat_name)
         if chat_id != "":
             self.__send_rich_message(post_message, "chat_id", chat_id)
         else:
@@ -420,15 +421,21 @@ class RobotArsenal:
         """
         self.__send_message(message, "user_id", user_id)
 
-    def get_members_in_chat(self, chat_name):
+    def get_members_in_chat(self, open_chat_id: str, chat_name: str=""):
         """
         获取群聊中用户信息列表 [{'open_id':,'user_id':}...]
         :param chat_name: 群聊名
+        :param open_chat_id: 群聊openid
         """
-        chat_id = self.__get_chat_id_with_name(chat_name)
+        if open_chat_id is None:
+            chat_id = self.__get_chat_id_with_name(chat_name)
+        else:
+            chat_id = open_chat_id
+        
         if chat_id == "":
             print("[RobotArsenal.get_members_in_chat] 未找到群聊\"{0}\"".format(chat_name))
             return None
+        
         members = self.__get_members_in_chat(chat_id)
         return members
 
@@ -441,6 +448,9 @@ class RobotArsenal:
             return at_all_replace
         
         return self.__get_user_id_with_name(username)
+
+    def get_chat_id_with_name(self, chat_name:str):
+        return self.__get_chat_id_with_name(chat_name)
 
     def get_name_with_open_id(self, open_id:str):
         """
