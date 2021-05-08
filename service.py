@@ -21,16 +21,17 @@ def message_center(bot: RobotArsenal, chat_type: str, open_id: str, open_chat_id
                 result_size = -1
             else:
                 result_size = (int)(all_numbers[0])
-            roll_and_notify(bot, result_size, open_chat_id)
+            roll_and_notify(bot, result_size, open_chat_id, open_id)
         else:
             print("[message_center] unknown service!")
             
 
-def roll_and_notify(bot: RobotArsenal, result_size: int, open_chat_id: str):
+def roll_and_notify(bot: RobotArsenal, result_size: int, open_chat_id: str, open_id: str):
     """
     在open_chat_id群组中随机选出result_size名用户，并进行@通知
     :param open_chat_id: 群聊ID
     :param result_size: 选取用户
+    :param open_id: 发起roll点的用户
     """
     if result_size == -1:
         bot.send_rich_message_to_chat(open_chat_id, title=roll_service_title.format(result_size), content=roll_error_param)
@@ -47,11 +48,16 @@ def roll_and_notify(bot: RobotArsenal, result_size: int, open_chat_id: str):
     while len(member_names) < result_size:
         if idx >= len(members):
             break
-        open_id = members[idx]["open_id"]
+        member_open_id = members[idx]["open_id"]
         idx = idx + 1
+        # roll 到自己，跳过
+        if member_open_id == open_id:
+            continue
+        user_name = bot.get_name_with_open_id(member_open_id)
 
-        user_name = bot.get_name_with_open_id(open_id)
+        # 未能取到用户名，跳过
         if str(user_name) == "None":
+            print("[service.roll_and_notify] 未能找到open_id:{0}对应的用户名", member_open_id)
             continue
         member_names.append(user_name)
         # print(user_name)
