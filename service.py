@@ -30,7 +30,7 @@ class Service:
             # do nothing now
             pass
         elif chat_type == group_chat_type:
-            if text.find(roll_label):
+            if text.find(roll_label) != -1:
                 substr = text[text.find(roll_label):]
                 all_numbers = re.findall('\d+', substr)
                 if len(all_numbers) == 0:
