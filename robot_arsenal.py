@@ -421,7 +421,7 @@ class RobotArsenal:
         """
         self.__send_message(message, "user_id", user_id)
 
-    def get_members_in_chat(self, open_chat_id: str, chat_name: str=""):
+    def get_members_in_chat(self, open_chat_id: str=None, chat_name: str=""):
         """
         获取群聊中用户信息列表 [{'open_id':,'user_id':}...]
         :param chat_name: 群聊名

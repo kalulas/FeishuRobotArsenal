@@ -4,7 +4,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import path
 import json
-from service import message_center
+from service import Service
 from urllib import request, parse
 from robot_arsenal import RobotArsenal
 
@@ -17,6 +17,7 @@ UNKNOWN_DEFAULT = 'UNKNOWN'
 request_interests = ['chat_type', 'open_id', 'open_chat_id', 'type', 'text']
 
 bot = RobotArsenal(APP_ID, APP_SECRET)
+service = Service(bot)
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -68,7 +69,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
 
         # 通知服务中心进行对应服务处理
-        message_center(bot, event.get("chat_type"), event.get("open_id"), event.get("open_chat_id"), event.get("text"))
+        service.message_broadcast(event.get("chat_type"), event.get("open_id"), event.get("open_chat_id"), event.get("text"))
 
         # 调用发消息 API 之前，先要获取 API 调用凭证：tenant_access_token
         access_token = self.get_tenant_access_token()
