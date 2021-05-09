@@ -413,9 +413,9 @@ class RobotArsenal:
         else:
             print("[RobotArsenal.send_rich_message_to_user] 未找到用户\"{0}\"".format(username))
 
-    def send_message_to_user_with_id(self, message, user_id):
+    def send_message_to_user_with_userid(self, message, user_id):
         """
-        发送私聊消息给用户
+        发送私聊消息给user_id制定的用户
         :param message: 需要发送的消息
         :param user_id: 用户id
         """
