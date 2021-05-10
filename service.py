@@ -73,9 +73,8 @@ class Service:
                 continue
 
             # roll 到免打扰，跳过
-            roll_no_disturb_dict = self.no_disturb_dict[roll_label]
-            if roll_no_disturb_dict and roll_no_disturb_dict[open_chat_id]:
-                if member_open_id in roll_no_disturb_dict[open_chat_id]:
+            if roll_label in self.no_disturb_dict.keys() and open_chat_id in self.no_disturb_dict[roll_label].keys():
+                if member_open_id in self.no_disturb_dict[roll_label][open_chat_id]:
                     continue
 
             user_name = self.bot.get_name_with_open_id(member_open_id)
