@@ -3,6 +3,8 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import path
+import time
+import traceback
 import json
 from service import Service
 from urllib import request, parse
@@ -13,6 +15,10 @@ APP_ID = "cli_9f58afd2fa2b900c"
 APP_SECRET = "84Pb4n70TjT77dsN9VbxJdgtQkrRkJEC"
 APP_VERIFICATION_TOKEN = "0r5T8WDJl5nxZFZ901xWJfCSgfhN0f7r"
 UNKNOWN_DEFAULT = 'UNKNOWN'
+
+# 机器人启动消息会被发送给这个id对应的用户
+NOTIFY_USER_ID = 'a86adbec'
+NOTIFY_MESSAGE = 'ROBOT ACTIVATED \n' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 request_interests = ['chat_type', 'open_id', 'open_chat_id', 'type', 'text']
 
@@ -149,8 +155,14 @@ def run():
     port = 8000
     server_address = ('', port)
     httpd = HTTPServer(server_address, RequestHandler)
-    print("start.....")
+    print("[echo_bot] start.....")
+    bot.send_message_to_user_with_userid(NOTIFY_MESSAGE, NOTIFY_USER_ID)
     httpd.serve_forever()
 
 if __name__ == '__main__':
-    run()
+    try:
+        run()
+    except BaseException as e:
+        bot.send_message_to_user_with_userid("!!ROBOT ERROR REPORT!!\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), NOTIFY_USER_ID)
+        bot.send_message_to_user_with_userid(repr(e), NOTIFY_USER_ID)
+        bot.send_message_to_user_with_userid(traceback.format_exc(), NOTIFY_USER_ID)

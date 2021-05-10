@@ -1,4 +1,9 @@
+# folders
 __pycache__
+logs
+.vscode
+
+# files
 id_list.txt
 no_disturb_users.txt
 run.py
