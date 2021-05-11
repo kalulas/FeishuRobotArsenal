@@ -60,7 +60,7 @@ class Service:
             print(error_message)
             self.bot.send_rich_message_to_chat(open_chat_id, title=roll_service_title.format(
                 result_size), content=roll_chat_no_found)
-            raise Exception(error_message)
+            return
 
         random.shuffle(members)  # 洗牌
         member_names = []
