@@ -18,7 +18,7 @@ UNKNOWN_DEFAULT = 'UNKNOWN'
 
 # 机器人启动消息会被发送给这个id对应的用户
 NOTIFY_USER_ID = 'a86adbec'
-NOTIFY_MESSAGE = 'ROBOT ACTIVATED \n' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+NOTIFY_START_MESSAGE = '[{0}] ROBOT SERVICE START'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
 request_interests = ['chat_type', 'open_id', 'open_chat_id', 'type', 'text']
 
@@ -156,13 +156,12 @@ def run():
     server_address = ('', port)
     httpd = HTTPServer(server_address, RequestHandler)
     print("[echo_bot] start.....")
-    bot.send_message_to_user_with_userid(NOTIFY_MESSAGE, NOTIFY_USER_ID)
+    bot.send_message_to_user_with_userid(NOTIFY_START_MESSAGE, NOTIFY_USER_ID)
     httpd.serve_forever()
 
 if __name__ == '__main__':
     try:
         run()
     except BaseException as e:
-        bot.send_message_to_user_with_userid("!!ROBOT ERROR REPORT!!\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), NOTIFY_USER_ID)
-        bot.send_message_to_user_with_userid(repr(e), NOTIFY_USER_ID)
         bot.send_message_to_user_with_userid(traceback.format_exc(), NOTIFY_USER_ID)
+        bot.send_message_to_user_with_userid('[{0}] ROBOT SERVICE TERMINATED'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())), NOTIFY_USER_ID)
