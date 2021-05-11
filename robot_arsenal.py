@@ -66,6 +66,7 @@ class RobotArsenal:
         """
         封装发送请求逻辑，返回response.data
         """
+        print("[RobotArsenal.__request] url:{0}, headers:{1}, req_body:{2}, method:{3}", url, str(headers), str(req_body), method)
         if headers == None:
             headers = {
                 "Content-Type": "application/json",
@@ -241,6 +242,7 @@ class RobotArsenal:
         """
         获取群组中的关键用户信息列表 [{'open_id':,'user_id':}...]
         """
+        print("[RobotArsenal.__get_members_in_chat] chat_id:{0}".format(chat_id))
         url = "https://open.feishu.cn/open-apis/chat/v4/info?chat_id={0}".format(chat_id)
         data = self.__request(url, None, None, 'GET')
         members = data.get("members")
