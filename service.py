@@ -9,6 +9,7 @@ group_chat_type = "group"
 roll_service_title = "\"roll {0}\"结果如下"
 roll_label = "roll"
 roll_error_param = "错误：命令格式为\"roll [人数]\""
+roll_chat_no_found = "错误：无法获取对应群组成员，可能是凭证已过期"
 
 no_disturb_json = "no_disturb_users.json"
 
@@ -55,9 +56,11 @@ class Service:
 
         members = self.bot.get_members_in_chat(open_chat_id)
         if members is None:
-            print("[service.roll_and_notify] 未找到 open_chat_id:{0} 对应群聊".format(
-                open_chat_id))
-            return
+            error_message = "[service.roll_and_notify] 未找到 open_chat_id:{0} 对应群聊".format(open_chat_id)
+            print(error_message)
+            self.bot.send_rich_message_to_chat(open_chat_id, title=roll_service_title.format(
+                result_size), content=roll_chat_no_found)
+            raise Exception(error_message)
 
         random.shuffle(members)  # 洗牌
         member_names = []
