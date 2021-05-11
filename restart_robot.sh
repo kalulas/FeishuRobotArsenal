@@ -19,4 +19,4 @@ fi
 
 echo "[$0] start echo_bot.py now" >> $log_full_path 2>&1
 cd $path
-python3 ./echo_bot.py >> $log_full_path 2>&1
+python3 -u ./echo_bot.py >> $log_full_path 2>&1
