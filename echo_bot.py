@@ -22,7 +22,7 @@ NOTIFY_MESSAGE = 'ROBOT ACTIVATED \n' + time.strftime("%Y-%m-%d %H:%M:%S", time.
 
 request_interests = ['chat_type', 'open_id', 'open_chat_id', 'type', 'text']
 
-bot = RobotArsenal(APP_ID, APP_SECRET)
+bot = RobotArsenal(APP_ID, APP_SECRET, True)
 service = Service(bot)
 
 class RequestHandler(BaseHTTPRequestHandler):

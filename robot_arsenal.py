@@ -1,6 +1,8 @@
 import re
+import time
 import json
 from urllib import request, parse
+from apscheduler.schedulers.background import BackgroundScheduler
 
 # 匹配富文本@成员
 at_pattern = r"@(\w+)\s"
@@ -16,10 +18,13 @@ common_text_pattern = r'[\s]*[^\s\@]+[\s]*'
 strip_pattern = r''
 
 class RobotArsenal:
-    def __init__(self, app_id, app_secret):
+    def __init__(self, app_id, app_secret, refresh_token:bool=False):
         '''
         飞书机器人武器库
+        :param refresh_token: 是否在持有期间周期性更新token
         '''
+        print("[RobotArsenal] created with ID:{0} SECRET:{1} REFRESH:{2}".format(app_id, app_secret, refresh_token))
+        
         self.app_id = app_id
         self.app_secret = app_secret
         # {用户名 -> {'user_id':, 'open_id':, 'union_id':}, }
@@ -27,6 +32,26 @@ class RobotArsenal:
         self.access_token = self.__get_tenant_access_token()
         # 提前缓存用户信息
         self.__update_department_members()
+        if not refresh_token:
+            return
+        self.__start_background_schedule()
+
+    def __update_access_token(self, ):
+        """
+        tenant access token 每隔2小时过期，需要定时刷新
+        """
+        self.access_token = self.__get_tenant_access_token()
+        print("[RobotArsenal.__update_access_token][{0}] update robot's access token to {1}".format(
+            time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), self.access_token))
+        
+    def __start_background_schedule(self, ):
+        """
+        使用BackgroundScheduler执行定时任务
+        """
+        scheduler = BackgroundScheduler()
+        # 时间间隔短于标准过期时间2小时
+        scheduler.add_job(self.__update_access_token, 'interval', minutes=90)
+        scheduler.start()
 
     def __get_tenant_access_token(self, ):
         """
