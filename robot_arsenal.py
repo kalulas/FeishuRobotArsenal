@@ -66,7 +66,7 @@ class RobotArsenal:
         """
         封装发送请求逻辑，返回response.data
         """
-        print("[RobotArsenal.__request] url:{0}, headers:{1}, req_body:{2}, method:{3}", url, str(headers), str(req_body), method)
+        print("[RobotArsenal.__request] url:{0}, headers:{1}, req_body:{2}, method:{3}".format(url, str(headers), str(req_body), method))
         if headers == None:
             headers = {
                 "Content-Type": "application/json",
@@ -82,7 +82,8 @@ class RobotArsenal:
         try:
             response = request.urlopen(req)
         except Exception as e:
-            print(e.read().decode())
+            print("Exception happed during request.rulopen(req)")
+            print("decode:" + e.read().decode())
             return {}
 
         rsp_body = response.read().decode('utf-8')
