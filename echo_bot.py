@@ -110,7 +110,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             response = request.urlopen(req)
         except Exception as e:
             print(e.read().decode())
-            return ""
+            raise
 
         rsp_body = response.read().decode('utf-8')
         rsp_dict = json.loads(rsp_body)
@@ -141,7 +141,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             response = request.urlopen(req)
         except Exception as e:
             print(e.read().decode())
-            return
+            raise
 
         rsp_body = response.read().decode('utf-8')
         rsp_dict = json.loads(rsp_body)
