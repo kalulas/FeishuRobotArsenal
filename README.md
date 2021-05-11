@@ -1,6 +1,14 @@
 # FeishuRobotArsenal
 一个飞书机器人武器库，一个机器人监听后台
 
+### 运行环境
+
+1. python3
+2. apscheduler
+3. 已申请的飞书机器人
+4. 权限需要自己申请
+
+
 ### TODO 
 - [x] 优化tenant_access_token获取 
 - [x] 优化部门用户信息缓存，更新机制
