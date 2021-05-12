@@ -29,7 +29,7 @@ class RobotArsenal:
         self.app_secret = app_secret
         # {用户名 -> {'user_id':, 'open_id':, 'union_id':}, }
         self.name_to_id_dict = {}
-        self.access_token = self.__get_tenant_access_token()
+        self.__update_access_token()
         # 提前缓存用户信息
         self.__update_department_members()
         # if not refresh_token:
@@ -92,19 +92,15 @@ class RobotArsenal:
         """
         封装发送请求逻辑，返回response.data
         """
-        print("[RobotArsenal.__request] url:{0}, headers:{1}, req_body:{2}, method:{3}".format(url, str(headers), str(req_body), method))
-        if headers == None:
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + self.access_token
-            }
+        default_headers = {
+            "Content-Type": "application/json", 
+            "Authorization": "Bearer " + self.access_token, 
+        }
+        print("[RobotArsenal.__request] url:{0}, headers:{1}, req_body:{2}, method:{3}".format(url, 
+        str(headers or default_headers), str(req_body or {}), method))
 
-        if req_body == None:
-            req_body = {}
-
-        data = bytes(json.dumps(req_body), encoding='utf8')
-        req = request.Request(url=url, data=data,
-                              headers=headers, method=method)
+        data = bytes(json.dumps(req_body or {}), encoding='utf8')
+        req = request.Request(url=url, data=data, headers=headers or default_headers, method=method)
         try:
             response = request.urlopen(req)
         except Exception as e:
