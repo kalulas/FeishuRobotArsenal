@@ -32,9 +32,9 @@ class RobotArsenal:
         self.access_token = self.__get_tenant_access_token()
         # 提前缓存用户信息
         self.__update_department_members()
-        if not refresh_token:
-            return
-        self.__start_background_schedule()
+        # if not refresh_token:
+        #     return
+        # self.__start_background_schedule()
 
     def __update_access_token(self, ):
         """
@@ -83,9 +83,10 @@ class RobotArsenal:
         return rsp_dict.get("tenant_access_token", "")
 
     def __handle_error_code(self, code: int):
+        print('[RobotArsenal.__handle_error_code] 处理错误码{0}'.format(code))
         if code == 99991663:
-            print('[RobotArsenal.__handle_error_code] 处理错误码{0}，重新获取access_token'.format(code))
-            self.__get_tenant_access_token()
+            print('[RobotArsenal.__handle_error_code] 重新获取access_token')
+            self.__update_access_token()
 
     def __request(self, url: str, headers: dict, req_body: dict, method='POST') -> dict:
         """
@@ -107,17 +108,17 @@ class RobotArsenal:
         try:
             response = request.urlopen(req)
         except Exception as e:
-            print("Exception happed during request.rulopen(req)")
-            print("decode:" + e.read().decode())
-            return {}
+            print("[RobotArsenal.__request] Exception happened during request.urlopen(req)")
+            rsp_body = e.read().decode()
+            rsp_dict = json.loads(rsp_body)
+            code = rsp_dict.get("code", -1)
+            if code != 0:
+                print("[RobotArsenal.__request] error, code =", code)
+                self.__handle_error_code(code)
+                return self.__request(url, headers, req_body, method)
 
         rsp_body = response.read().decode('utf-8')
         rsp_dict = json.loads(rsp_body)
-        code = rsp_dict.get("code", -1)
-        if code != 0:
-            print("[RobotArsenal.__request] error, code =", code)
-            self.__handle_error_code(code)
-            return {}
         return rsp_dict.get("data", {})
 
     def __send_message(self, message: str, id_type: str, id: str):
