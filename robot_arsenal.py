@@ -73,6 +73,7 @@ class RobotArsenal:
         if code == 99991663:
             print('[RobotArsenal.__handle_error_code] 重新获取access_token')
             self.__update_access_token()
+        print('[RobotArsenal.__handle_error_code] 未被处理的错误码{0}'.format(code))
 
     def __request(self, url: str, headers: dict, req_body: dict, method='POST') -> dict:
         """
