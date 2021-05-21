@@ -2,6 +2,7 @@ import re
 import time
 import json
 from urllib import request, parse
+import requests
 
 # 匹配富文本@成员
 at_pattern = r"@(\w+)\s"
@@ -73,7 +74,9 @@ class RobotArsenal:
         if code == 99991663:
             print('[RobotArsenal.__handle_error_code] 重新获取access_token')
             self.__update_access_token()
+            return True
         print('[RobotArsenal.__handle_error_code] 未被处理的错误码{0}'.format(code))
+        return False
 
     def __request(self, url: str, headers: dict, req_body: dict, method='POST') -> dict:
         """
@@ -97,14 +100,14 @@ class RobotArsenal:
             code = rsp_dict.get("code", -1)
             if code != 0:
                 print("[RobotArsenal.__request] error, code =", code)
-                self.__handle_error_code(code)
-                return self.__request(url, headers, req_body, method)
+                if self.__handle_error_code(code):
+                    return self.__request(url, headers, req_body, method)
 
         rsp_body = response.read().decode('utf-8')
         rsp_dict = json.loads(rsp_body)
         return rsp_dict.get("data", {})
 
-    def __send_message(self, message: str, id_type: str, id: str):
+    def __send_message(self, message: str, id_type: str, id: str, msg_type:str="text", content:dict=None):
         """
         发送消息
         :param message: 文本消息
@@ -257,6 +260,27 @@ class RobotArsenal:
         data = self.__request(url, None, None, 'GET')
         members = data.get("members")
         return members
+    
+    def __get_image_key(self, image_path:str, image_type:str="message") -> str:
+        """
+        根据图片获取上传用image_key
+        :param image_path: 图片路径
+        """
+        resp = requests.post(
+            url = 'https://open.feishu.cn/open-apis/image/v4/put/',
+            headers = {"Authorization": "Bearer {}".format(self.access_token)},
+            files = {
+                "image": open(image_path, 'rb').read()
+            },
+            data = {
+                "image_type": image_type
+            },
+            stream = True
+        )
+
+        resp.raise_for_status()
+        content = resp.json()
+        return content.get("data").get("image_key")
 
     def __process_at_message(self, at_content) -> str:
         """
@@ -359,6 +383,12 @@ class RobotArsenal:
                 continue
 
         return content
+
+    def send_message(self, message:str, id_type:str, id:str, msg_type:str="text", content:dict=None):
+        """
+        升级飞书机器人接口用，还没实现
+        """
+        self.__send_message(message, id_type, id, msg_type, content)
 
     def send_message_to_chat(self, message: str, chat_name: str):
         """
@@ -482,4 +512,7 @@ class RobotArsenal:
 
     def update_department_members(self, ):
         self.__update_department_members()
+
+    def get_image_key(self, image_path, image_type):
+        return self.__get_image_key(image_path, image_type)
     

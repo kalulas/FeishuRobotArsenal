@@ -20,7 +20,7 @@ UNKNOWN_DEFAULT = 'UNKNOWN'
 NOTIFY_USER_ID = 'a86adbec'
 NOTIFY_START_MESSAGE = '[{0}] ROBOT SERVICE START'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
-request_interests = ['chat_type', 'open_id', 'open_chat_id', 'type', 'text']
+request_interests = ['chat_type', 'open_id', 'open_chat_id', 'msg_type', 'type', 'text']
 
 bot = RobotArsenal(APP_ID, APP_SECRET)
 service = Service(bot)
@@ -69,6 +69,11 @@ class RequestHandler(BaseHTTPRequestHandler):
     def handle_message(self, event):
         # 此处只处理 text 类型消息，其他类型消息忽略
         msg_type = event.get("msg_type", "")
+        if msg_type == "sticker":
+            print("[EchoBot] 记录表情包file_key {0}".format(event.get("file_key")))
+            self.response("")
+            return
+
         if msg_type != "text":
             print("unknown msg_type =", msg_type)
             self.response("")
@@ -83,8 +88,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.response("")
             return
 
-        # 机器人 echo 收到的消息
-        self.send_message(access_token, event.get("open_id"), event.get("text"))
+        # 机器人 echo 收到的消息[已关闭]
+        # self.send_message(access_token, event.get("open_id"), event.get("text"))
         self.response("")
         return
 
