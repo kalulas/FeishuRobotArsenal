@@ -80,16 +80,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
 
         # 通知服务中心进行对应服务处理
-        service.message_broadcast(event.get("chat_type"), event.get("open_id"), event.get("open_chat_id"), event.get("text"))
-
-        # 调用发消息 API 之前，先要获取 API 调用凭证：tenant_access_token
-        access_token = self.get_tenant_access_token()
-        if access_token == "":
-            self.response("")
-            return
-
-        # 机器人 echo 收到的消息[已关闭]
-        # self.send_message(access_token, event.get("open_id"), event.get("text"))
+        if event.get("text") != event.get("text_without_at_bot"):
+            service.message_broadcast(event.get("chat_type"), event.get("open_id"), event.get("open_chat_id"), event.get("text"))
+        
         self.response("")
         return
 
