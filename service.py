@@ -8,6 +8,7 @@ group_chat_type = "group"
 
 roll_service_title = "\"roll {0}\"结果如下"
 roll_label = "roll"
+roll_service_message = "抽选: {0}\n在review结束后请在发起人消息下点赞"
 roll_error_param = "错误：命令格式为\"roll [人数]\""
 roll_chat_no_found = "错误：无法获取对应群组成员，可能是凭证已过期"
 
@@ -90,9 +91,10 @@ class Service:
             member_names.append(user_name)
             # print(user_name)
 
-        send_message = "result: "
+        at_members = ""
         for member_name in member_names:
-            send_message = send_message + "@{0} ".format(member_name)
+            at_members = at_members + "@{0} ".format(member_name)
 
+        send_message = roll_service_message.format(at_members)
         self.bot.send_rich_message_to_chat(open_chat_id, title=roll_service_title.format(
             result_size), content=send_message)
