@@ -1,6 +1,8 @@
 import re
 import random
 import json
+import time
+from services.service_roll import ServiceRoll
 from robot_arsenal import RobotArsenal
 
 private_chat_type = "private"
@@ -42,6 +44,20 @@ class Service:
                 self.roll_and_notify(result_size, open_chat_id, open_id)
             else:
                 print("[message_center] unknown service!")
+
+    def process_message_service(self, request:dict):
+        text = request.get("text", "")
+        service = None
+        time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        if text.find(ServiceRoll.LABEL) != -1:
+            service = ServiceRoll(self.bot)
+        else:
+            print("[ServiceCenter][{0}] 未找到匹配服务，请求内容{1}".format(time_str, str(request)))
+            return
+        
+        result = service.process(request)
+        print("[ServiceCenter][{0}] 服务处理{1}，请求内容{2}".format(time_str, result and "成功" or "失败", str(request)))
+        return
 
     def roll_and_notify(self, result_size: int, open_chat_id: str, open_id: str):
         """
