@@ -15,6 +15,9 @@ class ServiceRoll(ServiceBase):
     MESSAGE_ROLL_ERROR_RESULT_TITLE = "发生了错误"
     MESSAGE_ROLL_RESULT_BODY = "{0}\n(共{1}人)"
 
+    MESSAGE_LIST_RESULT_TITLE = "免打扰查询结果如下"
+    MESSAGE_LIST_DISTURB_EMPTY = "免打扰名单为空"
+
     def on_init(self):
         fp = open(no_disturb_json, 'r', encoding='utf-8')
         # 免打扰用户字典 {服务 -> {群组 -> [用户], }, }
@@ -61,6 +64,8 @@ class ServiceRoll(ServiceBase):
         # roll 人数 0不包含自己1包含自己
         if self.args[0].isnumeric():
             result = self.__process_roll__()
+        elif self.args[0] == "list":
+            result = self.__process_list__()
         else:
             self.invalid_args_process(ServiceFailure.ERROR_WRONG_ARGS)
         return result
@@ -113,4 +118,17 @@ class ServiceRoll(ServiceBase):
         send_message = self.MESSAGE_ROLL_RESULT_BODY.format(at_members, len(member_names))
         send_title = self.MESSAGE_ROLL_RESULT_TITLE.format(service_request_user, self.roll_result_size)
         self.bot.send_rich_message_to_chat(self.open_chat_id, title=send_title, content=send_message)
+        return True
+
+    def __process_list__(self, ) -> bool:
+        message = self.MESSAGE_LIST_DISTURB_EMPTY
+        no_disturb_names = []
+        if self.LABEL in self.no_disturb_dict.keys() and self.open_chat_id in self.no_disturb_dict[self.LABEL].keys():
+            for member_open_id in self.no_disturb_dict[self.LABEL][self.open_chat_id]:
+                no_disturb_name = self.bot.get_name_with_open_id(member_open_id)
+                if str(no_disturb_name) == "None":
+                    no_disturb_name = "未知({0})".format(member_open_id)
+                no_disturb_names.append(no_disturb_name)
+            message = "\n".join(name for name in no_disturb_names)
+        self.bot.send_rich_message_to_chat(self.open_chat_id, title=self.MESSAGE_LIST_RESULT_TITLE, content=message)
         return True
