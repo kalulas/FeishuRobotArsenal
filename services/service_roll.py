@@ -129,6 +129,9 @@ class ServiceRoll(ServiceBase):
                 if str(no_disturb_name) == "None":
                     no_disturb_name = "未知({0})".format(member_open_id)
                 no_disturb_names.append(no_disturb_name)
-            message = "\n".join(name for name in no_disturb_names)
+            if len(no_disturb_names) > 0:
+                message = ""
+            for i in range(0, len(no_disturb_names)):
+                message = message + "{0}. {1} \n".format(i+1, no_disturb_names[i])
         self.bot.send_rich_message_to_chat(self.open_chat_id, title=self.MESSAGE_LIST_RESULT_TITLE, content=message)
         return True

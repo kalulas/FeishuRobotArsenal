@@ -369,7 +369,7 @@ class RobotArsenal:
                 content[line_size].append({
                     "tag": "text",
                     "un_escape": True,
-                    "text": re.sub(r'\s', '&nbsp;', matchObj.group(0)),
+                    "text": re.sub(r'[^\S\r\n]', '&nbsp;', matchObj.group(0)),
                     # "text": matchObj.group(0),
                 })
                 match_locate = matchObj.span()[1]
