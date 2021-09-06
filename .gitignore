@@ -4,6 +4,7 @@ logs
 .vscode
 
 # files
-id_list.txt
+*.txt
+no_disturb_users.json
 no_disturb_users.txt
 run.py
