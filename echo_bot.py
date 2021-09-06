@@ -81,7 +81,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         # 通知服务中心进行对应服务处理
         if event.get("text") != event.get("text_without_at_bot"):
-            service.message_broadcast(event.get("chat_type"), event.get("open_id"), event.get("open_chat_id"), event.get("text"))
+            # service.message_broadcast(event.get("chat_type"), event.get("open_id"), event.get("open_chat_id"), event.get("text"))
+            service.process_message_service(event)
         
         self.response("")
         return
