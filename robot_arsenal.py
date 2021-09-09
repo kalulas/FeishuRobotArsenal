@@ -28,6 +28,8 @@ class RobotArsenal:
         self.app_secret = app_secret
         # {用户名 -> {'user_id':, 'open_id':, 'union_id':}, }
         self.name_to_id_dict = {}
+        # [(群聊open_id, 群聊名), ]
+        self.chat_list:list = None
         self.__update_access_token()
         # 提前缓存用户信息
         self.__update_department_members()
@@ -201,6 +203,9 @@ class RobotArsenal:
         """
         获取机器人所在群组的关键信息列表 [(chat_id, name), ]
         """
+        if self.chat_list != None:
+            return self.chat_list
+        
         url = "https://open.feishu.cn/open-apis/chat/v4/list"
         data = self.__request(url, None, None, 'GET')
         group_list = data.get("groups", [])
@@ -209,6 +214,8 @@ class RobotArsenal:
         # "avatar", "chat_id", "description", "name", "owner_open_id", "owner_user_id":
         for group in group_list:
             ret.append((group['chat_id'], group['name']))
+
+        self.chat_list = ret
         return ret
 
     def __get_chat_id_with_name(self, chat_name) -> str:
