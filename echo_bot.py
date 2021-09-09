@@ -55,8 +55,19 @@ class RequestHandler(BaseHTTPRequestHandler):
     def print_request_detail_message(self, type_str, event_body):
         print('---------- INCOMING REQUEST ----------')
         print('[request type] ' + type_str)
+        if type(event_body) is not dict:
+            print("[echo_bot.print_request_detail_message] event_body not dict, got " + str(type(event_body)))
+            return
+
         for interest in request_interests:
-            print('[{0}] {1}'.format(interest, event_body.get(interest, UNKNOWN_DEFAULT)))
+            message = event_body.get(interest, UNKNOWN_DEFAULT)
+            appendix = ""
+            if interest == "open_id":
+                appendix = bot.get_name_with_open_id(message)
+            elif interest == "open_chat_id":
+                appendix = "GROUPCHAT-TODO"
+            print('[{0}] {1} {2}'.format(interest, message, appendix))
+        
         return
 
     def handle_request_url_verify(self, post_obj):
