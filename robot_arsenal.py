@@ -224,6 +224,20 @@ class RobotArsenal:
                 break
         return ret
 
+    def __get_chat_name_with_id(self, chat_open_id:str) -> str:
+        """
+        根据群聊open_id获取对应的群聊名，获取失败时返回None
+        :param chat_open_id: 群聊open_id
+        """
+        ret = None
+        chat_list = self.__get_chat_list()
+        for chat_info in chat_list:
+            if chat_info[0] == chat_open_id:
+                ret = chat_info[1]
+                break
+        
+        return ret
+
     def __get_user_id_with_name(self, username) -> str:
         """
         :param username: 用户名 
@@ -494,7 +508,14 @@ class RobotArsenal:
     def get_chat_id_with_name(self, chat_name:str):
         return self.__get_chat_id_with_name(chat_name)
 
-    def get_name_with_open_id(self, open_id:str):
+    def get_chat_name_with_id(self, chat_open_id:str) -> str:
+        """
+        根据群聊open_id获取对应的群聊名，获取失败时返回None
+        :param chat_open_id: 群聊open_id
+        """
+        return self.__get_chat_name_with_id(chat_open_id)
+
+    def get_user_name_with_id(self, open_id:str):
         """
         :param open_id: 用户open_id
         根据open_id获取用户名，找不到时返回None

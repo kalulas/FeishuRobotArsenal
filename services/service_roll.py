@@ -99,7 +99,7 @@ class ServiceRoll(ServiceBase):
                 if member_open_id in self.no_disturb_dict[self.LABEL][self.open_chat_id]:
                     continue
 
-            user_name = self.bot.get_name_with_open_id(member_open_id)
+            user_name = self.bot.get_user_name_with_id(member_open_id)
             if str(user_name) == "None":
                 self.invalid_args_process(ServiceFailure.ERROR_USERNAME_NOT_FOUND)
                 continue
@@ -110,7 +110,7 @@ class ServiceRoll(ServiceBase):
         for member_name in member_names:
             at_members = at_members + "@{0} ".format(member_name)
 
-        service_request_user = self.bot.get_name_with_open_id(self.open_id)
+        service_request_user = self.bot.get_user_name_with_id(self.open_id)
         if str(service_request_user) == "None":
                 self.invalid_args_process(ServiceFailure.ERROR_USERNAME_NOT_FOUND)
                 return False
@@ -125,7 +125,7 @@ class ServiceRoll(ServiceBase):
         no_disturb_names = []
         if self.LABEL in self.no_disturb_dict.keys() and self.open_chat_id in self.no_disturb_dict[self.LABEL].keys():
             for member_open_id in self.no_disturb_dict[self.LABEL][self.open_chat_id]:
-                no_disturb_name = self.bot.get_name_with_open_id(member_open_id)
+                no_disturb_name = self.bot.get_user_name_with_id(member_open_id)
                 if str(no_disturb_name) == "None":
                     no_disturb_name = "未知({0})".format(member_open_id)
                 no_disturb_names.append(no_disturb_name)

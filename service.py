@@ -97,7 +97,7 @@ class Service:
                 if member_open_id in self.no_disturb_dict[roll_label][open_chat_id]:
                     continue
 
-            user_name = self.bot.get_name_with_open_id(member_open_id)
+            user_name = self.bot.get_user_name_with_id(member_open_id)
 
             # 未能取到用户名，跳过
             if str(user_name) == "None":

@@ -63,9 +63,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             message = event_body.get(interest, UNKNOWN_DEFAULT)
             appendix = ""
             if interest == "open_id":
-                appendix = bot.get_name_with_open_id(message)
+                appendix = bot.get_user_name_with_id(message)
             elif interest == "open_chat_id":
-                appendix = "GROUPCHAT-TODO"
+                appendix = bot.get_chat_name_with_id(message)
             print('[{0}] {1} {2}'.format(interest, message, appendix))
         
         return
