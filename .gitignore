@@ -8,3 +8,4 @@ logs
 no_disturb_users.json
 no_disturb_users.txt
 run.py
+*.sh
