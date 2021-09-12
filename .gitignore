@@ -9,3 +9,6 @@ no_disturb_users.json
 no_disturb_users.txt
 run.py
 *.sh
+
+# config 配置
+config.json
