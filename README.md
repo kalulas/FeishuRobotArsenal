@@ -5,12 +5,19 @@
 
 ```
 Root:.
+│  .gitignore
+│  config.json # 应用配置json
+│  config.py # 配置管理
 │  echo_bot.py # 服务器后台 基于HTTPServer，依赖RobotArsenal，Service
 │  no_disturb_users.json # 服务免打扰用户配置
 │  README.md
-│  restart_robot.sh # 重启机器人shell脚本，可结合crontab使用
 │  robot_arsenal.py # RobotArsenal 机器人武器库
-│  service.py # Service 机器人服务
+│  service.py # Service 机器人服务中心
+│
+│
+└─services
+   │  service_base.py # 机器人服务基类
+   └─ service_roll.py # 机器人roll点服务
         
 ```
 
