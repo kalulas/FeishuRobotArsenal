@@ -1,5 +1,8 @@
 import json
 
+# 位置内容字符串
+UNKNOWN_DEFAULT = 'UNKNOWN'
+
 class Config:
     """
     配置管理器

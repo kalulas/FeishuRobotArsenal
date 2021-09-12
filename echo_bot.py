@@ -1,21 +1,13 @@
 #!/usr/bin/env python
 # --coding:utf-8--
 
-from config import Config
+from config import Config, UNKNOWN_DEFAULT
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from os import path
-import time
 import traceback
 import json
 from service import Service
 from urllib import request, parse
 from robot_arsenal import RobotArsenal
-
-
-APP_ID = "cli_9f58afd2fa2b900c"
-APP_SECRET = "84Pb4n70TjT77dsN9VbxJdgtQkrRkJEC"
-APP_VERIFICATION_TOKEN = "0r5T8WDJl5nxZFZ901xWJfCSgfhN0f7r"
-UNKNOWN_DEFAULT = 'UNKNOWN'
 
 request_interests = ['chat_type', 'open_id', 'open_chat_id', 'msg_type', 'type', 'text']
 
@@ -31,7 +23,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         # 校验 verification token 是否匹配，token 不匹配说明该回调并非来自开发平台
         token = obj.get("token", "")
-        if token != APP_VERIFICATION_TOKEN:
+        if token != config.get("APP_VERIFICATION_TOKEN"):
             print("verification token not match, token =", token)
             self.response("")
             return
@@ -108,8 +100,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             "Content-Type" : "application/json"
         }
         req_body = {
-            "app_id": APP_ID,
-            "app_secret": APP_SECRET
+            "app_id": config.get("APP_ID"),
+            "app_secret": config.get("APP_SECRET")
         }
 
         data = bytes(json.dumps(req_body), encoding='utf8')
@@ -165,12 +157,11 @@ def run():
     # 2. 飞书机器人
     # 3. 服务中心
     config = Config("config.json")
-    bot = RobotArsenal(APP_ID, APP_SECRET)
+    bot = RobotArsenal(config.get("APP_ID"), config.get("APP_SECRET"))
     service = Service(bot)
     
     # 初始化服务器
-    port = 8000
-    server_address = ('', port)
+    server_address = ('', config.get("SERVER_PORT"))
     httpd = HTTPServer(server_address, RequestHandler)
     print("[echo_bot] start.....")
     # TODO 服务器启动邮件通知
